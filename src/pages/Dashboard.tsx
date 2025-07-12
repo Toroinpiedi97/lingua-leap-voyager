@@ -9,6 +9,10 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { MiniAvatar } from "@/components/MiniAvatar";
 import { ProgressBar } from "@/components/ProgressBar";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
+import { MobileOptimized } from "@/components/MobileOptimized";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { useCapacitor } from "@/hooks/useCapacitor";
 import { 
   Bell, 
   Settings, 
@@ -21,8 +25,10 @@ import {
   Calendar,
   Award
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function Dashboard() {
+  const { isNative, triggerNotification } = useCapacitor();
   const userName = "Nicolas";
   const currentLevel = 4;
   const xpCurrent = 1321;
@@ -31,10 +37,19 @@ export default function Dashboard() {
   const dailyGoalProgress = 3;
   const dailyGoalTotal = 5;
 
+  const handleLessonStart = () => {
+    triggerNotification();
+    console.log("Start lesson");
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <OfflineIndicator />
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+      <header className={cn(
+        "sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50",
+        isNative && "pt-safe-top"
+      )}>
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -128,7 +143,7 @@ export default function Dashboard() {
               title="Impara 5 nuove parole"
               progress={dailyGoalProgress}
               total={dailyGoalTotal}
-              onStart={() => console.log("Start lesson")}
+              onStart={handleLessonStart}
             />
 
             {/* Recent Achievements */}
@@ -194,6 +209,11 @@ export default function Dashboard() {
                 />
               </div>
             </Card>
+
+            {/* Voice Recorder */}
+            <VoiceRecorder 
+              onRecordingComplete={(url) => console.log("Recording completed:", url)}
+            />
           </div>
         </div>
 
@@ -207,10 +227,12 @@ export default function Dashboard() {
               <p className="text-muted-foreground mb-6">
                 Ogni giorno è un passo verso la fluenza. Inizia la tua prossima lezione ora!
               </p>
-              <Button variant="floating" size="xl" className="animate-pulse-glow">
-                <BookOpen size={24} />
-                Inizia Nuova Lezione
-              </Button>
+              <MobileOptimized enableHaptics>
+                <Button variant="floating" size="xl" className="animate-pulse-glow" onClick={handleLessonStart}>
+                  <BookOpen size={24} />
+                  Inizia Nuova Lezione
+                </Button>
+              </MobileOptimized>
             </div>
           </Card>
         </section>
@@ -219,7 +241,7 @@ export default function Dashboard() {
       {/* Floating Action Button */}
       <FloatingActionButton
         icon={BookOpen}
-        onClick={() => console.log("Quick lesson start")}
+        onClick={handleLessonStart}
         variant="success"
         size="lg"
       />
